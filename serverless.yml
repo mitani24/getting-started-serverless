@@ -1,0 +1,43 @@
+service: getting-started-serverless
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: python3.8
+  lambdaHashingVersion: 20201221
+  region: ap-northeast-1
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:*
+          Resource: "*"
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - http:
+          path: /
+          method: get
+          integration: lambda
+          request:
+            template:
+              application/json: '{ "person_id": "$input.params("person_id")" }'#    The following are a few example events you can configure
+
+resources:
+  Resources:
+    DemoDynamoDbTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: person_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: person_id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+        TableName: demo-sls-person
